@@ -1,19 +1,73 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { API } from '../../config';
+import Loading from '../../components/Loading';
 
 const Login = () => {
   const navigate = useNavigate();
-
+  const location = useLocation();
+  const controller = new AbortController();
+  const signal = controller.signal;
   const [selectedRole, setSelectedRole] = useState('Role');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    role: '',
+  });
+
+  useEffect(() => {
+    console.log('dimana', location);
+    return () => controller.abort();
+  }, [location]);
+
+  const handleLogin = async (role) => {
+    try {
+      setIsLoading(true);
+
+      const response = await axios.post(
+        `${API}/authentication/login/${role.toLowerCase()}`,
+        formData,
+        { signal },
+      );
+      console.log('resp login', response.data);
+
+      const { status, data } = response.data;
+
+      if (status === 'success') {
+        localStorage.setItem('ref_token', data.refreshToken);
+        localStorage.setItem('role', role.toLowerCase());
+        localStorage.setItem('acc_token', data.accessToken);
+        localStorage.setItem('id_user', data.id);
+        navigate(`/dashboard/${role.toLowerCase()}`);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      alert(error.response.data.message);
+    }
+  };
 
   const handleRoleChange = (role, event) => {
+    console.log('role', role);
     event.preventDefault();
     setSelectedRole(role);
     setIsDropdownOpen(false);
+    setFormData({ ...formData, role: role.toUpperCase() });
   };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData({ ...formData, [name]: value });
+    console.log(formData);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Loading status={isLoading} />
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -32,7 +86,9 @@ const Login = () => {
                 type="text"
                 autoComplete="text"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                value={formData.username}
+                onChange={handleFormChange}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border bg-gray-100 border-gray-300 placeholder-gray-500 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Username"
               />
             </div>
@@ -46,7 +102,9 @@ const Login = () => {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                value={formData.password}
+                onChange={handleFormChange}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border bg-gray-100 border-gray-300 placeholder-gray-500 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
               />
             </div>
@@ -110,13 +168,13 @@ const Login = () => {
             <button
               onClick={(event) => {
                 event.preventDefault();
-                if (selectedRole === 'Admin') {
-                  navigate('../dashboard/admin/management-user');
-                } else if (selectedRole === 'Penjaga') {
-                  navigate('../dashboard/penjaga/dashboard-penjaga');
-                } else {
-                  navigate('../dashboard/peminjam/dashboard-peminjam');
-                }
+                handleLogin(
+                  selectedRole === 'Admin'
+                    ? 'Admin'
+                    : selectedRole === 'Penjaga'
+                    ? 'Penjaga'
+                    : 'Peminjam',
+                );
               }}
               disabled={selectedRole === 'Role'}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

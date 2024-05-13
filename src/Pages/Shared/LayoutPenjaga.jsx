@@ -1,17 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { API } from '../../config';
+import axios from 'axios';
+import Loading from '../../components/Loading';
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [actived, setActived] = useState('/dashboard/penjaga/dashboard-penjaga');
+  const [isLoading, setIsLoading] = useState(false);
+  const [actived, setActived] = useState();
 
   useEffect(() => {
+    if (location.pathname === '/dashboard/penjaga') {
+      navigate('dashboard-penjaga', { state: location.state });
+    }
     setActived(location.pathname);
   }, [location]);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.post(`${API}/authentication/logout`, {
+        refreshToken: localStorage.getItem('ref_token'),
+      });
+      console.log(response);
+      const { status, data } = response.data;
+      if (status === 'success') {
+        localStorage.clear();
+        navigate('../../login');
+      } else {
+        alert(data.message);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      alert(error.response.data.message);
+    }
+  };
   return (
     <div className="fixed top-0 left-0 h-full w-16.5 bg-blue-600 text-white flex flex-col items-start justify-start flex-wrap gap-3">
+      <Loading status={isLoading} />
       <div className="py-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -23,7 +53,7 @@ const Sidebar = () => {
       </div>
 
       <button
-        onClick={() => navigate('/dashboard/penjaga/dashboard-penjaga')}
+        onClick={() => navigate('dashboard-penjaga', { state: location.state })}
         className={`px-2 py-1 text-sm hover:bg-blue-700 w-full text-left ${
           actived === '/dashboard/penjaga/dashboard-penjaga' ? 'bg-blue-700' : ''
         }`}
@@ -33,7 +63,7 @@ const Sidebar = () => {
       </button>
 
       <button
-        onClick={() => navigate('/dashboard/penjaga/book-management')}
+        onClick={() => navigate('book-management', { state: location.state })}
         className={`px-2 py-1 text-sm hover:bg-blue-700 w-full text-left ${
           actived === '/dashboard/penjaga/book-management' ? 'bg-blue-700' : ''
         }`}
@@ -43,7 +73,7 @@ const Sidebar = () => {
       </button>
 
       <button
-        onClick={() => navigate('/dashboard/penjaga/loan-approval')}
+        onClick={() => navigate('loan-approval', { state: location.state })}
         className={`px-2 py-1 text-sm hover:bg-blue-700 w-full text-left ${
           actived === '/dashboard/penjaga/loan-approval' ? 'bg-blue-700' : ''
         }`}
@@ -53,7 +83,7 @@ const Sidebar = () => {
       </button>
 
       <button
-        onClick={() => navigate('/dashboard/penjaga/list-of-borrowing')}
+        onClick={() => navigate('list-of-borrowing', { state: location.state })}
         className={`px-2 py-1 text-sm hover:bg-blue-700 w-full text-left ${
           actived === '/dashboard/penjaga/list-of-borrowing' ? 'bg-blue-700' : ''
         }`}
@@ -63,7 +93,7 @@ const Sidebar = () => {
       </button>
 
       <button
-        onClick={() => navigate('../../login')}
+        onClick={handleLogout}
         className="px-2 py-1 text-sm hover:bg-blue-700 w-full mt-auto text-left"
       >
         Logout

@@ -1,6 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { API } from '../../../config';
+import axios from 'axios';
 
 const ListOfBorrowing = () => {
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    // console.log('location book-management', location);
+    getData();
+  }, []);
+
+  const getData = async () => {
+    try {
+      const headers = {
+        Authorization: `Bearer ${localStorage.getItem('acc_token')}`,
+      };
+      const response = await axios.get(`${API}/penjaga/list-borrower`, { headers });
+      const { status, data } = response.data;
+      console.log(data);
+      if (status === 'success') {
+        setData(data);
+      } else {
+        alert(error.response.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      alert(error.response.data.message);
+    }
+  };
   return (
     <div>
       <div className="flex flex-col justify-between mb-7">
@@ -19,16 +45,14 @@ const ListOfBorrowing = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>1</td>
-              <td>John Doe</td>
-              <td>Pantai dan kehidupannya</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Mamat Budiman</td>
-              <td>Naruto</td>
-            </tr>
+            {data &&
+              data.map((item, index) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>{item.nama_peminjam}</td>
+                  <td>{item.buku_yang_dipinjam}</td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>

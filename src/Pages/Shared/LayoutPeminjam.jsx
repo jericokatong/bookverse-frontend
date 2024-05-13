@@ -1,15 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { API } from '../../config';
+import axios from 'axios';
+import Loading from '../../components/Loading';
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [actived, setActived] = useState('/dashboard/peminjam/dashboard-peminjam');
+  const [actived, setActived] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    if (location.pathname === '/dashboard/peminjam') {
+      navigate('dashboard-peminjam', { state: location.state });
+    }
     setActived(location.pathname);
   }, [location]);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.post(`${API}/authentication/logout`, {
+        refreshToken: localStorage.getItem('ref_token'),
+      });
+      console.log(response);
+      const { status, data } = response.data;
+      if (status === 'success') {
+        localStorage.clear();
+        navigate('../../login');
+      } else {
+        alert(data.message);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      alert(error.response.data.message);
+    }
+  };
   return (
     <div className="fixed top-0 left-0 h-full w-16.5 bg-blue-600 text-white flex flex-col items-start justify-start flex-wrap gap-3">
       <div className="py-4">
@@ -53,7 +81,7 @@ const Sidebar = () => {
       </button>
 
       <button
-        onClick={() => navigate('../../login')}
+        onClick={handleLogout}
         className="px-2 py-1 text-sm hover:bg-blue-700 w-full mt-auto text-left"
       >
         Logout
