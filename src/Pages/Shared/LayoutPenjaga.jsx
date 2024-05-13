@@ -117,7 +117,7 @@ const Header = () => {
         <p>Bookverse</p>
       </div>
       <div>
-        <p>Penjaga</p>
+        <p>{localStorage.getItem('username')}</p>
       </div>
     </div>
   );
