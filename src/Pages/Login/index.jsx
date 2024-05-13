@@ -41,6 +41,7 @@ const Login = () => {
         localStorage.setItem('role', role.toLowerCase());
         localStorage.setItem('acc_token', data.accessToken);
         localStorage.setItem('id_user', data.id);
+        localStorage.setItem('username', data.username);
         navigate(`/dashboard/${role.toLowerCase()}`);
       }
       setIsLoading(false);
