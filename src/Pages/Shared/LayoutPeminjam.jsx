@@ -40,6 +40,7 @@ const Sidebar = () => {
   };
   return (
     <div className="fixed top-0 left-0 h-full w-16.5 bg-blue-600 text-white flex flex-col items-start justify-start flex-wrap gap-3">
+      <Loading status={isLoading} />
       <div className="py-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
