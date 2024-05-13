@@ -8,6 +8,7 @@ const KembalikanBuku = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [data, setData] = useState('');
+  const [idTarget, setIdTarget] = useState('');
 
   useEffect(() => {
     getData();
@@ -23,10 +24,16 @@ const KembalikanBuku = () => {
       });
       const { status, data } = response;
 
-      console.log('data', data);
+      // console.log('data', data.data.id_borrowing);
       console.log('status', status);
       if (status == '200') {
         setData(data);
+        if (data) {
+          if (data.data.id_borrowing) {
+            console.log('ini id borrowing');
+            setIdTarget(data.data.id_borrowing);
+          }
+        }
       } else {
         alert(data.message);
       }
@@ -35,6 +42,33 @@ const KembalikanBuku = () => {
       alert(error.response.data.message);
     }
   };
+
+  const handleKembalikan = async () => {
+    try {
+      setIsLoading(true);
+      console.log(localStorage.getItem('acc_token'));
+      const headers = {
+        Authorization: `Bearer ${localStorage.getItem('acc_token')}`,
+      };
+      console.log('id target', idTarget);
+      const response = await axios.put(`${API}/peminjam/return/book/${idTarget}`, {}, { headers });
+      const { status, data } = response.data;
+
+      if (status === 'success') {
+        alert('Berhasil kembalikan buku');
+      } else {
+        alert(error.response.data.message);
+      }
+      setOpenModal(false);
+      setIsLoading(false);
+    } catch (error) {
+      setOpenModal(false);
+      setIsLoading(false);
+      console.log(error);
+      alert(error.response.data.message);
+    }
+  };
+
   return (
     <div>
       <Loading status={isLoading} />
@@ -50,7 +84,7 @@ const KembalikanBuku = () => {
         isVisible={openModal}
         onClose={() => setOpenModal(false)}
         text="Apakah anda yakin ingin mengembalikan buku ini?"
-        onConfirm={() => setIsLoading(true)}
+        onConfirm={handleKembalikan}
       />
     </div>
   );

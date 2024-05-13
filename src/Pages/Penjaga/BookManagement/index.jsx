@@ -47,7 +47,8 @@ const BookManagement = () => {
       const { status, data } = response.data;
 
       if (status === 'success') {
-        window.location.reload();
+        // window.location.reload();
+        alert('berhasil hapus buku');
       } else {
         alert(error.response.data.message);
       }

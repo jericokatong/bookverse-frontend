@@ -52,7 +52,8 @@ const ManagementUser = () => {
       const { status, data } = response.data;
 
       if (status === 'success') {
-        window.location.reload();
+        // window.location.reload();
+        alert('Berhasil delete');
       } else {
         alert(error.response.data.message);
       }

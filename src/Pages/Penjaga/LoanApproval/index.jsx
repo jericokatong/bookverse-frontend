@@ -50,7 +50,8 @@ const LoanApproval = () => {
       const { status, data } = response.data;
 
       if (status === 'success') {
-        window.location.reload();
+        // window.location.reload();
+        alert('berhasil approve peminjaman');
       } else {
         alert(error.response.data.message);
       }
@@ -79,7 +80,8 @@ const LoanApproval = () => {
       const { status, data } = response.data;
 
       if (status === 'success') {
-        window.location.reload();
+        // window.location.reload();
+        alert('Berhasil reject peminjamn');
       } else {
         alert(error.response.data.message);
       }

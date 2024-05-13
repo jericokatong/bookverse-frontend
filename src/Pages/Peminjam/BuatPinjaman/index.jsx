@@ -45,7 +45,8 @@ const BuatPinjaman = () => {
       const { status, data } = response.data;
 
       if (status === 'success') {
-        window.location.reload();
+        // window.location.reload();
+        alert('Berhasil meminjam buku');
       } else {
         alert('error');
       }
